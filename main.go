@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"context"
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -25,13 +26,17 @@ func readPhraseFromFile(filename string) ([]string, error) {
 
 	scanner := bufio.NewScanner(file)
 	if scanner.Scan() {
-		return strings.Fields(scanner.Text()), nil
+		phrase := strings.Fields(scanner.Text())
+		if len(phrase) == 0 {
+			return nil, errors.New("seed phrase is empty")
+		}
+		return phrase, nil
 	}
 	if err := scanner.Err(); err != nil {
 		return nil, err
 	}
 
-	return nil, nil
+	return nil, errors.New("file is empty")
 }
 
 func readReceiversFromFile(filename string) (map[string]string, error) {
@@ -76,6 +81,11 @@ func main() {
 	words, err := readPhraseFromFile("phrase.txt")
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to read seed phrase from file")
+	}
+
+	//check if the seed phrase is valid
+	if len(words) != 24 {
+		log.Fatal().Msg("Invalid seed phrase: Seed phrase must contain exactly 24 words / invalid pharse")
 	}
 
 	//initialize high-load wallet
