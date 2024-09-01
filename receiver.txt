@@ -1,0 +1,4 @@
+address penerima with format
+address1,0.1
+address2,0.2
+address3,0.14121521
